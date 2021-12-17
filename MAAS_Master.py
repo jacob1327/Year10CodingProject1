@@ -1,6 +1,7 @@
 import requests
 import json
 import time
+import csv
 import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.widgets import RangeSlider
@@ -8,6 +9,7 @@ from matplotlib.widgets import Button
 from matplotlib.widgets import RadioButtons
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 from matplotlib.collections import LineCollection
+
 
 current_url = "https://api.maas2.apollorion.com"
 current_response = (requests.get(current_url)).json()
@@ -136,7 +138,7 @@ plt.xticks(np.arange(min(time_interval), max(time_interval)+increment1, incremen
 
 
 # Create the RangeSlider
-slider_ax = plt.axes([0.15, 0.02, 0.58, 0.03])
+slider_ax = plt.axes([0.15, 0.02, 0.53, 0.03])
 # slider = RangeSlider(slider_ax, "Martian Sol  ", 1, current_sol, (3000, current_sol))
 slider = RangeSlider(slider_ax, "Martian Sol ", 0, current_sol, (start_sol, end_sol))
 
@@ -355,6 +357,8 @@ def visualization_selection(graph_type):
     global norm
     global filtered_list1
     global filtered_list2
+    global time_interval3
+    global filtered_list3
     global fill_between_col1
     global fill_between_col2
 
@@ -551,7 +555,52 @@ def visualization_selection(graph_type):
 radio.on_clicked(visualization_selection)
 
 # Create the Button
-button_ax = plt.axes([0.82, 0.015, 0.1, 0.040])
+button_ax = plt.axes([0.769, 0.015, 0.1, 0.040])
+
+# Create the Download Button
+button_ax2 = plt.axes([0.84, 0.015, 0.1, 0.040])
+
+def download(val):
+    radio_value = radio.value_selected
+    if radio_value == 'pressure':
+        categories = ['Sol', 'Pressure']
+
+        sol_column = time_interval
+        weather_data = pressure_data
+        print('hi')
+
+        with open('mars_weather_data.csv', 'w') as f:
+            writer = csv.writer(f)
+            writer.writerow(categories)
+            writer.writerows(zip(sol_column, weather_data))
+
+    elif radio_value == 'max/min temp':
+        categories = ['Sol', 'Maximum Temperature', 'Minimum Temperature']
+
+        sol_column = time_interval
+        weather_data = filtered_list1
+        weather_data2 = filtered_list2
+
+        with open('mars_weather_data.csv', 'w') as f:
+            writer = csv.writer(f)
+            writer.writerow(categories)
+            writer.writerows(zip(sol_column, weather_data, weather_data2))
+    elif radio_value == 'gts_temp':
+        categories = ['Sol', 'GTS Temperature']
+
+        sol_column = time_interval3
+        weather_data = filtered_list3
+
+        with open('mars_weather_data.csv', 'w') as f:
+            writer = csv.writer(f)
+            writer.writerow(categories)
+            writer.writerows(zip(sol_column, weather_data))
+
+
+download_image = plt.imread('download_button.jpg')
+download_button = Button(button_ax2, "", image=download_image, color='0.85', hovercolor='0.95')
+download_button.on_clicked(download)
+
 # slider = RangeSlider(slider_ax, "Martian Sol  ", 1, current_sol, (3000, current_sol))
 refresh_button = Button(button_ax, "Refresh", image=None, color='0.85', hovercolor='0.95')
 refresh_button.on_clicked(refresh)
